@@ -352,104 +352,120 @@ class _EditorScreenState extends State<EditorScreen> {
                       onItemSelected: (i) => setState(() => _sidebarIndex = i),
                     ),
 
-                  ToolBar(
-                    selectedTool: _selectedTool,
-                    onToolSelected: _selectTool,
-                    selectedColor: _selectedColor,
-                    onColorSelected: (c) => setState(() => _selectedColor = c),
-                  ),
+                  if (!isMobile)
+                    ToolBar(
+                      direction: Axis.vertical,
+                      selectedTool: _selectedTool,
+                      onToolSelected: _selectTool,
+                      selectedColor: _selectedColor,
+                      onColorSelected: (c) => setState(() => _selectedColor = c),
+                    ),
 
                   // Canvas
                   Expanded(
-                    child: Stack(
+                    child: Column(
                       children: [
-                        // Multi-layer canvas
-                        CanvasArea(
-                          canvasBoundaryKey: _canvasBoundaryKey,
-                          transformController: _transformController,
-                          layers: _layers,
-                          layerStrokes: _layerStrokes,
-                          currentStrokePoints: _currentStrokePoints,
-                          currentColor: _selectedColor,
-                          currentStrokeWidth: _strokeWidth,
-                          currentBrush: _selectedTool == 4
-                              ? BrushType.eraser
-                              : _currentBrush,
-                          activeLayerId: _activeLayerId,
-                          layerImages: _layerImages,
-                          onPanStart: _onPanStart,
-                          onPanUpdate: _onPanUpdate,
-                          onPanEnd: _onPanEnd,
-                        ),
+                        Expanded(
+                          child: Stack(
+                            children: [
+                              // Multi-layer canvas
+                              CanvasArea(
+                                canvasBoundaryKey: _canvasBoundaryKey,
+                                transformController: _transformController,
+                                layers: _layers,
+                                layerStrokes: _layerStrokes,
+                                currentStrokePoints: _currentStrokePoints,
+                                currentColor: _selectedColor,
+                                currentStrokeWidth: _strokeWidth,
+                                currentBrush: _selectedTool == 4
+                                    ? BrushType.eraser
+                                    : _currentBrush,
+                                activeLayerId: _activeLayerId,
+                                layerImages: _layerImages,
+                                onPanStart: _onPanStart,
+                                onPanUpdate: _onPanUpdate,
+                                onPanEnd: _onPanEnd,
+                              ),
 
-                        // Color picker bar
-                        Positioned(
-                          bottom: 16,
-                          left: 0,
-                          right: 0,
-                          child: Center(
-                            child: ColorPickerBar(
-                              selectedColor: _selectedColor,
-                              onColorSelected: (c) =>
-                                  setState(() => _selectedColor = c),
-                            ),
-                          ),
-                        ),
-
-                        // Brush size indicator
-                        Positioned(
-                          bottom: 80,
-                          left: 0,
-                          right: 0,
-                          child: Center(
-                            child: _BrushSizeControl(
-                              size: _strokeWidth,
-                              onChanged: (v) => setState(() => _strokeWidth = v),
-                            ),
-                          ),
-                        ),
-
-                        // Scanning indicator
-                        if (_isScanning)
-                          Positioned.fill(
-                            child: Container(
-                              color: Colors.black54,
-                              child: const Center(
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    CircularProgressIndicator(
-                                      color: AppColors.accentGreen,
-                                    ),
-                                    SizedBox(height: 16),
-                                    Text(
-                                      'Scanning edges...',
-                                      style: TextStyle(color: Colors.white),
-                                    ),
-                                  ],
+                              // Color picker bar
+                              Positioned(
+                                bottom: 16,
+                                left: 0,
+                                right: 0,
+                                child: Center(
+                                  child: ColorPickerBar(
+                                    selectedColor: _selectedColor,
+                                    onColorSelected: (c) =>
+                                        setState(() => _selectedColor = c),
+                                  ),
                                 ),
                               ),
-                            ),
-                          ),
 
-                        // Zoom info
-                        Positioned(
-                          bottom: 16,
-                          right: 16,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 5),
-                            decoration: BoxDecoration(
-                              color: AppColors.bgSecondary,
-                              borderRadius: BorderRadius.circular(6),
-                              border: Border.all(color: AppColors.border),
-                            ),
-                            child: Text(
-                              '$zoomPercent%',
-                              style: AppStyles.caption(),
-                            ),
+                              // Brush size indicator
+                              Positioned(
+                                bottom: 80,
+                                left: 0,
+                                right: 0,
+                                child: Center(
+                                  child: _BrushSizeControl(
+                                    size: _strokeWidth,
+                                    onChanged: (v) => setState(() => _strokeWidth = v),
+                                  ),
+                                ),
+                              ),
+
+                              // Scanning indicator
+                              if (_isScanning)
+                                Positioned.fill(
+                                  child: Container(
+                                    color: Colors.black54,
+                                    child: const Center(
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          CircularProgressIndicator(
+                                            color: AppColors.accentGreen,
+                                          ),
+                                          SizedBox(height: 16),
+                                          Text(
+                                            'Scanning edges...',
+                                            style: TextStyle(color: Colors.white),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+
+                              // Zoom info
+                              Positioned(
+                                bottom: 16,
+                                right: 16,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 5),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.bgSecondary,
+                                    borderRadius: BorderRadius.circular(6),
+                                    border: Border.all(color: AppColors.border),
+                                  ),
+                                  child: Text(
+                                    '$zoomPercent%',
+                                    style: AppStyles.caption(),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
+                        if (isMobile)
+                          ToolBar(
+                            direction: Axis.horizontal,
+                            selectedTool: _selectedTool,
+                            onToolSelected: _selectTool,
+                            selectedColor: _selectedColor,
+                            onColorSelected: (c) => setState(() => _selectedColor = c),
+                          ),
                       ],
                     ),
                   ),
@@ -500,6 +516,28 @@ class _EditorScreenState extends State<EditorScreen> {
               ),
             )
           : null,
+      endDrawer: isMobile
+          ? Drawer(
+              backgroundColor: AppColors.bgSidebar,
+              child: LayerPanel(
+                layers: _layers,
+                activeLayerId: _activeLayerId,
+                onLayerSelected: (id) =>
+                    setState(() => _activeLayerId = id),
+                onOpacityChanged: (id, v) => setState(() {
+                  _layers.firstWhere((l) => l.id == id).opacity = v;
+                }),
+                onVisibilityChanged: (id, v) => setState(() {
+                  _layers.firstWhere((l) => l.id == id).visible = v;
+                }),
+                onLockChanged: (id, v) => setState(() {
+                  _layers.firstWhere((l) => l.id == id).locked = v;
+                }),
+                onAddLayer: () => _addDrawingLayer(),
+                onDeleteLayer: _deleteLayer,
+              ),
+            )
+          : null,
     );
   }
 
@@ -536,75 +574,92 @@ class _EditorScreenState extends State<EditorScreen> {
 
           const Spacer(),
 
-          // Import Image
-          _TopBtn(
-            icon: Icons.image_outlined,
-            label: 'Import',
-            onTap: _importImage,
-          ),
-          const SizedBox(width: 6),
+          Flexible(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              reverse: true,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Import Image
+                  _TopBtn(
+                    icon: Icons.image_outlined,
+                    label: 'Import',
+                    onTap: _importImage,
+                  ),
+                  const SizedBox(width: 6),
 
-          // Scan to Sketch
-          _TopBtn(
-            icon: Icons.document_scanner_outlined,
-            label: 'Scan',
-            onTap: _scanToSketch,
-          ),
-          const SizedBox(width: 12),
+                  // Scan to Sketch
+                  _TopBtn(
+                    icon: Icons.document_scanner_outlined,
+                    label: 'Scan',
+                    onTap: _scanToSketch,
+                  ),
+                  const SizedBox(width: 12),
 
-          // Undo / Redo / Clear
-          _TopIconBtn(
-            icon: Icons.undo,
-            onTap: _undo,
-            enabled: _history.canUndo,
-            tooltip: 'Undo (Ctrl+Z)',
-          ),
-          _TopIconBtn(
-            icon: Icons.redo,
-            onTap: _redo,
-            enabled: _history.canRedo,
-            tooltip: 'Redo (Ctrl+Shift+Z)',
-          ),
-          _TopIconBtn(
-            icon: Icons.delete_outline,
-            onTap: _clearCanvas,
-            tooltip: 'Clear',
-          ),
+                  // Undo / Redo / Clear
+                  _TopIconBtn(
+                    icon: Icons.undo,
+                    onTap: _undo,
+                    enabled: _history.canUndo,
+                    tooltip: 'Undo (Ctrl+Z)',
+                  ),
+                  _TopIconBtn(
+                    icon: Icons.redo,
+                    onTap: _redo,
+                    enabled: _history.canRedo,
+                    tooltip: 'Redo (Ctrl+Shift+Z)',
+                  ),
+                  _TopIconBtn(
+                    icon: Icons.delete_outline,
+                    onTap: _clearCanvas,
+                    tooltip: 'Clear',
+                  ),
 
-          const SizedBox(width: 8),
+                  const SizedBox(width: 8),
 
-          // Toggle layer panel
-          _TopIconBtn(
-            icon: Icons.layers,
-            onTap: () => setState(() => _showLayerPanel = !_showLayerPanel),
-            tooltip: 'Layers',
-          ),
+                  // Toggle layer panel
+                  _TopIconBtn(
+                    icon: Icons.layers,
+                    onTap: () {
+                      if (isMobile) {
+                        Scaffold.of(context).openEndDrawer();
+                      } else {
+                        setState(() => _showLayerPanel = !_showLayerPanel);
+                      }
+                    },
+                    tooltip: 'Layers',
+                  ),
 
-          const SizedBox(width: 8),
+                  const SizedBox(width: 8),
 
-          // Export
-          OutlinedButton.icon(
-            onPressed: _exportPng,
-            icon: const Icon(Icons.download, size: 16),
-            label: const Text('Export'),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.textPrimary,
-              side: const BorderSide(color: AppColors.border),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+                  // Export
+                  OutlinedButton.icon(
+                    onPressed: _exportPng,
+                    icon: const Icon(Icons.download, size: 16),
+                    label: const Text('Export'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.textPrimary,
+                      side: const BorderSide(color: AppColors.border),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    ),
+                  ),
+
+                  if (!isMobile) ...[
+                    const SizedBox(width: 12),
+                    const CircleAvatar(
+                      radius: 16,
+                      backgroundColor: AppColors.bgCard,
+                      child: Icon(Icons.person, color: AppColors.textSecondary, size: 18),
+                    ),
+                  ],
+                ],
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             ),
           ),
-
-          if (!isMobile) ...[
-            const SizedBox(width: 12),
-            const CircleAvatar(
-              radius: 16,
-              backgroundColor: AppColors.bgCard,
-              child: Icon(Icons.person, color: AppColors.textSecondary, size: 18),
-            ),
-          ],
         ],
       ),
     );

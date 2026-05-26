@@ -6,6 +6,7 @@ class ToolBar extends StatelessWidget {
   final ValueChanged<int> onToolSelected;
   final Color selectedColor;
   final ValueChanged<Color> onColorSelected;
+  final Axis direction;
 
   const ToolBar({
     super.key,
@@ -13,87 +14,105 @@ class ToolBar extends StatelessWidget {
     required this.onToolSelected,
     required this.selectedColor,
     required this.onColorSelected,
+    this.direction = Axis.vertical,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 52,
-      decoration: const BoxDecoration(
-        color: AppColors.bgSecondary,
-        border: Border(
-          right: BorderSide(color: AppColors.border, width: 1),
+    final isVertical = direction == Axis.vertical;
+
+    final children = [
+      if (isVertical) const SizedBox(height: 12) else const SizedBox(width: 12),
+      // Drawing tools
+      ..._tools.asMap().entries.map((entry) {
+        final i = entry.key;
+        final tool = entry.value;
+        return _ToolButton(
+          icon: tool['icon'] as IconData,
+          isActive: selectedTool == i,
+          activeColor: tool['color'] as Color,
+          tooltip: tool['label'] as String,
+          onTap: () => onToolSelected(i),
+          isVertical: isVertical,
+        );
+      }),
+
+      if (isVertical) const SizedBox(height: 8) else const SizedBox(width: 8),
+      // Divider
+      Container(
+        margin: isVertical 
+            ? const EdgeInsets.symmetric(horizontal: 12)
+            : const EdgeInsets.symmetric(vertical: 12),
+        height: isVertical ? 1 : null,
+        width: isVertical ? null : 1,
+        color: AppColors.border,
+      ),
+      if (isVertical) const SizedBox(height: 8) else const SizedBox(width: 8),
+
+      // Search/zoom
+      _ToolButton(
+        icon: Icons.search,
+        isActive: false,
+        activeColor: AppColors.accentCyan,
+        tooltip: 'Search',
+        onTap: () {},
+        isVertical: isVertical,
+      ),
+
+      if (isVertical) const Spacer() else const SizedBox(width: 24),
+
+      // Color swatches
+      _ColorSwatch(
+        color: Colors.black,
+        isSelected: selectedColor == Colors.black,
+        onTap: () => onColorSelected(Colors.black),
+      ),
+      _ColorSwatch(
+        color: AppColors.accentPink,
+        isSelected: selectedColor == AppColors.accentPink,
+        onTap: () => onColorSelected(AppColors.accentPink),
+      ),
+      _ColorSwatch(
+        color: AppColors.accentCyan,
+        isSelected: selectedColor == AppColors.accentCyan,
+        onTap: () => onColorSelected(AppColors.accentCyan),
+      ),
+      if (isVertical) const SizedBox(height: 8) else const SizedBox(width: 8),
+      // Add color button
+      GestureDetector(
+        onTap: () {},
+        child: Container(
+          width: 28,
+          height: 28,
+          margin: isVertical 
+              ? const EdgeInsets.only(bottom: 16)
+              : const EdgeInsets.only(right: 16),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: AppColors.border, width: 1.5),
+          ),
+          child: const Icon(Icons.add, color: AppColors.textMuted, size: 14),
         ),
       ),
-      child: Column(
-        children: [
-          const SizedBox(height: 12),
-          // Drawing tools
-          ..._tools.asMap().entries.map((entry) {
-            final i = entry.key;
-            final tool = entry.value;
-            return _ToolButton(
-              icon: tool['icon'] as IconData,
-              isActive: selectedTool == i,
-              activeColor: tool['color'] as Color,
-              tooltip: tool['label'] as String,
-              onTap: () => onToolSelected(i),
-            );
-          }),
+    ];
 
-          const SizedBox(height: 8),
-          // Divider
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 12),
-            height: 1,
-            color: AppColors.border,
-          ),
-          const SizedBox(height: 8),
-
-          // Search/zoom
-          _ToolButton(
-            icon: Icons.search,
-            isActive: false,
-            activeColor: AppColors.accentCyan,
-            tooltip: 'Search',
-            onTap: () {},
-          ),
-
-          const Spacer(),
-
-          // Color swatches
-          _ColorSwatch(
-            color: Colors.black,
-            isSelected: selectedColor == Colors.black,
-            onTap: () => onColorSelected(Colors.black),
-          ),
-          _ColorSwatch(
-            color: AppColors.accentPink,
-            isSelected: selectedColor == AppColors.accentPink,
-            onTap: () => onColorSelected(AppColors.accentPink),
-          ),
-          _ColorSwatch(
-            color: AppColors.accentCyan,
-            isSelected: selectedColor == AppColors.accentCyan,
-            onTap: () => onColorSelected(AppColors.accentCyan),
-          ),
-          const SizedBox(height: 8),
-          // Add color button
-          GestureDetector(
-            onTap: () {},
-            child: Container(
-              width: 28,
-              height: 28,
-              margin: const EdgeInsets.only(bottom: 16),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: AppColors.border, width: 1.5),
-              ),
-              child: const Icon(Icons.add, color: AppColors.textMuted, size: 14),
-            ),
-          ),
-        ],
+    return Container(
+      width: isVertical ? 52 : double.infinity,
+      height: isVertical ? double.infinity : 52,
+      decoration: BoxDecoration(
+        color: AppColors.bgSecondary,
+        border: isVertical
+            ? const Border(right: BorderSide(color: AppColors.border, width: 1))
+            : const Border(top: BorderSide(color: AppColors.border, width: 1)),
       ),
+      child: isVertical
+          ? SingleChildScrollView(
+              child: Column(children: children),
+            )
+          : SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(children: children),
+            ),
     );
   }
 
@@ -112,6 +131,7 @@ class _ToolButton extends StatefulWidget {
   final Color activeColor;
   final String tooltip;
   final VoidCallback onTap;
+  final bool isVertical;
 
   const _ToolButton({
     required this.icon,
@@ -119,6 +139,7 @@ class _ToolButton extends StatefulWidget {
     required this.activeColor,
     required this.tooltip,
     required this.onTap,
+    this.isVertical = true,
   });
 
   @override
@@ -142,7 +163,9 @@ class _ToolButtonState extends State<_ToolButton> {
             duration: const Duration(milliseconds: 200),
             width: 38,
             height: 38,
-            margin: const EdgeInsets.symmetric(vertical: 3),
+            margin: widget.isVertical
+                ? const EdgeInsets.symmetric(vertical: 3)
+                : const EdgeInsets.symmetric(horizontal: 3),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
               gradient: widget.isActive ? AppColors.primaryGradient : null,
@@ -187,7 +210,7 @@ class _ColorSwatch extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         width: isSelected ? 30 : 26,
         height: isSelected ? 30 : 26,
-        margin: const EdgeInsets.symmetric(vertical: 4),
+        margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
         decoration: BoxDecoration(
           color: color,
           shape: BoxShape.circle,
@@ -198,7 +221,7 @@ class _ColorSwatch extends StatelessWidget {
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: color.withOpacity(0.5),
+                    color: color.withAlpha(128),
                     blurRadius: 8,
                     spreadRadius: 1,
                   )

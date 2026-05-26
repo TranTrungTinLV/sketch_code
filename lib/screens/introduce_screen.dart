@@ -338,58 +338,109 @@ class _IntroduceScreenState extends State<IntroduceScreen> with SingleTickerProv
 
               _buildAnimatedItem(
                 delay: 0.9,
-                child: Row(
-                  spacing: 32.w,
-                  children: List.generate(guides.length, (index) {
-                    final guide = guides[index];
-                    return Expanded(
-                      child: Container(
-                        padding: EdgeInsets.all(32.sp),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF1A0B2E),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.white24, width: 1),
-                        ),
-                        child: Column(
-                          spacing: 12.h,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              padding: EdgeInsets.symmetric(vertical: 15.w, horizontal: 19.h),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF1A0B2E),
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(color: Colors.white24, width: 1),
+                child: isMobile 
+                  ? Column(
+                      spacing: 16.h,
+                      children: List.generate(guides.length, (index) {
+                        final guide = guides[index];
+                        return Container(
+                          padding: EdgeInsets.all(32.sp),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF1A0B2E),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: Colors.white24, width: 1),
+                          ),
+                          child: Column(
+                            spacing: 12.h,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                padding: EdgeInsets.symmetric(vertical: 15.w, horizontal: 19.h),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF1A0B2E),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(color: Colors.white24, width: 1),
+                                ),
+                                child: Image.asset(
+                                  'assets/images/guide_${index}.png',
+                                  width: 40,
+                                  height: 40,
+                                  errorBuilder: (_, __, ___) => const Icon(Icons.info, color: Colors.white),
+                                ),
                               ),
-                              child: Image.asset(
-                                'assets/images/guide_${index}.png',
-                                width: 40,
-                                height: 40,
-                                errorBuilder: (_, __, ___) => const Icon(Icons.info, color: Colors.white),
+                              Text(
+                                guide.title,
+                                style: GoogleFonts.playfairDisplay(
+                                  color: Colors.white,
+                                  fontSize: 18.sp,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
+                              SizedBox(height: 8.h),
+                              Text(
+                                guide.description,
+                                style: GoogleFonts.inter(
+                                  color: Colors.white70,
+                                  fontSize: 12.sp,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }),
+                    )
+                  : Row(
+                      spacing: 32.w,
+                      children: List.generate(guides.length, (index) {
+                        final guide = guides[index];
+                        return Expanded(
+                          child: Container(
+                            padding: EdgeInsets.all(32.sp),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF1A0B2E),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: Colors.white24, width: 1),
                             ),
-                            Text(
-                              guide.title,
-                              style: GoogleFonts.playfairDisplay(
-                                color: Colors.white,
-                                fontSize: isMobile ? 18.sp : 24.sp,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            child: Column(
+                              spacing: 12.h,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  padding: EdgeInsets.symmetric(vertical: 15.w, horizontal: 19.h),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF1A0B2E),
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(color: Colors.white24, width: 1),
+                                  ),
+                                  child: Image.asset(
+                                    'assets/images/guide_${index}.png',
+                                    width: 40,
+                                    height: 40,
+                                    errorBuilder: (_, __, ___) => const Icon(Icons.info, color: Colors.white),
+                                  ),
+                                ),
+                                Text(
+                                  guide.title,
+                                  style: GoogleFonts.playfairDisplay(
+                                    color: Colors.white,
+                                    fontSize: 24.sp,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                SizedBox(height: 8.h),
+                                Text(
+                                  guide.description,
+                                  style: GoogleFonts.inter(
+                                    color: Colors.white70,
+                                    fontSize: 16.sp,
+                                  ),
+                                ),
+                              ],
                             ),
-                            SizedBox(height: 8.h),
-                            Text(
-                              guide.description,
-                              style: GoogleFonts.inter(
-                                color: Colors.white70,
-                                fontSize: isMobile ? 12.sp : 16.sp,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }),
-                ),
+                          ),
+                        );
+                      }),
+                    ),
               ),
               SizedBox(height: 60.h),
             ],

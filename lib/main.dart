@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:sketch/screens/editor/editor_screen.dart';
 import 'package:sketch/screens/introduce_screen.dart';
 import 'package:sketch/screens/try_demo.dart';
-import 'package:sketch/screens/editor/editor_screen.dart';
 
 void main() {
   runApp(const MyApp());

@@ -45,55 +45,58 @@ class ColorPickerBar extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          ..._presetColors.map((color) {
-            final isSelected = selectedColor.value == color.value;
-            return GestureDetector(
-              onTap: () => onColorSelected(color),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                margin: const EdgeInsets.symmetric(horizontal: 4),
-                width: isSelected ? 30 : 24,
-                height: isSelected ? 30 : 24,
-                decoration: BoxDecoration(
-                  color: color,
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: isSelected ? AppColors.accentCyan : Colors.white24,
-                    width: isSelected ? 2.5 : 1,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ..._presetColors.map((color) {
+              final isSelected = selectedColor.value == color.value;
+              return GestureDetector(
+                onTap: () => onColorSelected(color),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  width: isSelected ? 30 : 24,
+                  height: isSelected ? 30 : 24,
+                  decoration: BoxDecoration(
+                    color: color,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: isSelected ? AppColors.accentCyan : Colors.white24,
+                      width: isSelected ? 2.5 : 1,
+                    ),
+                    boxShadow: isSelected
+                        ? [
+                            BoxShadow(
+                              color: color.withOpacity(0.5),
+                              blurRadius: 8,
+                              spreadRadius: 1,
+                            )
+                          ]
+                        : [],
                   ),
-                  boxShadow: isSelected
-                      ? [
-                          BoxShadow(
-                            color: color.withOpacity(0.5),
-                            blurRadius: 8,
-                            spreadRadius: 1,
-                          )
-                        ]
-                      : [],
                 ),
+              );
+            }),
+            const SizedBox(width: 8),
+            GestureDetector(
+              onTap: () {
+                // TODO: Open full color picker
+              },
+              child: Container(
+                width: 28,
+                height: 28,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AppColors.border, width: 1.5),
+                ),
+                child: const Icon(Icons.add, color: AppColors.textMuted, size: 16),
               ),
-            );
-          }),
-          const SizedBox(width: 8),
-          GestureDetector(
-            onTap: () {
-              // TODO: Open full color picker
-            },
-            child: Container(
-              width: 28,
-              height: 28,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: AppColors.border, width: 1.5),
-              ),
-              child: const Icon(Icons.add, color: AppColors.textMuted, size: 16),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
