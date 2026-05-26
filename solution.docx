@@ -1,0 +1,79 @@
+ 1. Thay đổi cốt lõi: Từ Nhận diện hình sang Lưu trữ nét vẽ
+Ở phiên bản "Họa sĩ", chúng ta sẽ không cố gắng đoán xem người dùng vẽ hình gì (ví dụ: vẽ 3 nét núi -> hiện ra tranh núi đẹp) hay biến nó thành Widget thông thường.
+
+Logic mới: Ứng dụng sẽ tập trung 100% vào việc lưu trữ và tái tạo toàn bộ dữ liệu nét vẽ tay (hand-drawn stroke data) một cách chính xác nhất. Không lọc, không snap vào hình học, mà giữ nguyên "hồn" của nét vẽ.
+
+Cấu trúc dữ liệu: Vẫn dùng List<Stroke>, nhưng Stroke lúc này sẽ chứa hàng ngàn điểm Offset và không cần Bounding Box để gom nhóm.
+
+2. Triển khai các tính năng mới (Logic không dùng AI)
+Dưới đây là cách bạn có thể thực hiện các tính năng bạn muốn bằng code Flutter thuần hoặc các thư viện xử lý ảnh thông thường mà không cần đến các mô hình AI phức tạp:
+
+A. Tính năng Import Ảnh tham khảo
+UX/UI: Thêm một nút Import Image trên màn hình Drawing Canvas.
+
+Flutter Implementation: 1. Dùng package image_picker để cho phép người dùng chọn ảnh từ thư viện hoặc chụp từ camera.
+2. Dùng widget Image.file() để hiển thị ảnh đó trên Canvas.
+3. Bạn có thể sử dụng Stack để đặt CustomPaint (màn hình vẽ) lên trên lớp ảnh tham khảo. Thêm một thanh trượt (Slider) để người dùng có thể điều chỉnh độ mờ (opacity) của ảnh tham khảo giúp họ nhìn rõ nét vẽ của mình hơn.
+
+B. Tính năng Xử lý nét vẽ thực tế
+Vì bạn không muốn AI "vẽ hộ" người dùng mà muốn lưu nét vẽ thật, chúng ta sẽ không dùng thuật toán clustering (gom nhóm) nữa.
+
+Flutter Implementation: 1. Trên CustomPaint, khi người dùng vẽ chân dung, bạn chỉ cần lưu tất cả các nét vào một mảng List<Stroke>.
+2. Để nét vẽ trông mượt mà và nghệ thuật hơn (ví dụ: nét bút chì, cọ vẽ), bạn nên sử dụng các thư viện như perfect_freehand thay vì vẽ đường thẳng drawPoints đơn giản.
+3. Khi xuất file, bạn sẽ không xuất code Flutter mà xuất ra một hình ảnh (PNG/JPEG) hoặc một dữ liệu nét vẽ phức tạp (ví dụ: file SVG hoặc JSON chứa dữ liệu nét vẽ) để người dùng có thể mở và sửa lại trên các công cụ vẽ khác.
+
+C. Tính năng Tự phác thảo / Scan ảnh thành bản vẽ (Edge Detection)
+Để thực hiện tính năng này mà không dùng AI, chúng ta sẽ dùng kỹ thuật Xử lý ảnh (Image Processing) truyền thống, cụ thể là các thuật toán phát hiện cạnh (edge detection).
+
+Logic xử lý: 1. Bạn có thể dùng package edge_detection có sẵn trên Flutter, hoặc gọi đến native code (qua Method Channels) nếu muốn sử dụng các thuật toán mạnh hơn như Canny edge detection hoặc các mô hình toán học nâng cao hơn một chút như HED (Holistically-Nested Edge Detection).
+2. Khi người dùng import ảnh -> ảnh được đẩy qua hàm phát hiện cạnh.
+3. Kết quả là một bức ảnh trắng đen chỉ chứa các đường viền chính của bức ảnh gốc (ví dụ: đường viền khuôn mặt, mắt, mũi, miệng).
+
+Hiển thị kết quả: 1. Hiển thị bức ảnh kết quả đã được scan (dạng nét phác thảo) lên Canvas như một lớp tham khảo (Layer 2).
+2. Người dùng sau đó có thể vẽ một lớp mới (Layer 3) trên CustomPaint dựa trên các đường nét phác thảo này.
+
+Tổng hợp Quy trình thực hiện (Phiên bản Họa sĩ):
+UI: Giữ nguyên khung UI bạn đã có nhưng thay vì nút Generate UI, hãy thêm các nút Import Reference, Opactiy Slider, Scan to Sketch.
+
+Lưu trữ dữ liệu: Chỉ lưu List<Stroke> thô của toàn bộ bức vẽ.
+
+Logic Import & Xử lý nét vẽ: Sử dụng perfect_freehand để nét vẽ mượt mà, dùng Stack để lồng ảnh tham khảo và Canvas.
+
+Logic Scan ảnh: Tích hợp một thư viện xử lý ảnh (như package edge_detection) để chuyển ảnh tham khảo thành phác thảo nét viền trắng đen.
+
+Với hướng đi này, ứng dụng của bạn sẽ trở thành một công cụ vẽ nghệ thuật thực sự mạnh mẽ, cho phép người dùng kiểm soát 100% tác phẩm của mình và chỉ sử dụng công nghệ như một công cụ hỗ trợ scan/phác thảo ban đầu.
+
+
+
+
+
+
+2. Tư duy Logic (Logic Architecture) và Giải pháp Thuật toán (Algorithmic Solutions) cho phiên bản "DoodleMaster - Họa sĩ số".Dự án này đòi hỏi sự chính xác cao trong việc bắt nét, xử lý ảnh và quản lý không gian làm việc. Đây là tài liệu yêu cầu logic cốt lõi (Core Logic Requirements) để bạn dùng làm kim chỉ nam khi tự triển khai.Khối 1: Logic Quản lý Nét vẽ (Stroke Engine Logic)Yêu cầu bài toán:Họa sĩ cần nét vẽ phải mượt, tự nhiên, có độ đậm nhạt tùy theo tốc độ tay (velocity), và không bị đứt đoạn hay góc cạnh (aliasing) khi vẽ nhanh.Giải pháp Logic & Thuật toán:Thu thập dữ liệu (Data Sampling):Logic: Không lưu mọi điểm cảm ứng (touch points) thiết bị trả về. Thiết bị thường gửi quá nhiều điểm gây nặng bộ nhớ hoặc quá ít điểm gây đứt nét.Thuật toán cần dùng: Thuật toán lọc nhiễu (Ví dụ: Douglas-Peucker algorithm để giảm số điểm thừa trên một đường thẳng) hoặc nội suy (Interpolation) để bù điểm bị thiếu.Làm mượt nét vẽ (Smoothing):Logic: Nối các điểm bằng đường thẳng sẽ tạo ra nét vẽ "gãy khúc". Cần uốn cong đường nối giữa các điểm.Thuật toán cần dùng: Spline Interpolation (Cụ thể là Catmull-Rom Splines hoặc Cubic Bezier Curves). Thuật toán này lấy các điểm người dùng vẽ làm điểm neo (control points) và tự động tính toán một đường cong hoàn hảo đi qua (hoặc đi gần) các điểm đó.Mô phỏng áp lực nét bút (Pressure/Velocity Simulation):Logic: Vì hầu hết màn hình điện thoại/web không đo được lực nhấn vật lý (trừ bút stylus), ta phải "giả lập" lực nhấn dựa trên tốc độ vẽ.Công thức: $Vận tốc (v) = \frac{Khoảng cách (d)}{Thời gian (t)}$. Nếu $v$ lớn (vẽ nhanh), nét vẽ sẽ mỏng đi. Nếu $v$ nhỏ (vẽ chậm, nắn nót), nét vẽ sẽ dày lên. Tạo một hàm toán học tỷ lệ nghịch giữa Độ dày (Thickness) và Vận tốc (Velocity).Khối 2: Logic Quản lý Layer & Không gian (Workspace Logic)Yêu cầu bài toán:Người dùng cần một không gian làm việc đa tầng (giống Photoshop) để vừa xem ảnh mẫu, vừa xem bản phác thảo (scan), vừa tự vẽ đè lên. Đồng thời, họ phải có thể zoom (phóng to/thu nhỏ) và pan (di chuyển) bản vẽ mà không làm hỏng tọa độ nét vẽ.Giải pháp Logic & Thuật toán:Cấu trúc Đa tầng (Multi-layer Architecture):Logic: Quản lý theo cấu trúc Stack (ngăn xếp).Tầng trệt (Layer 0): Ảnh thật (Imported Image).Tầng giữa (Layer 1): Ảnh phác thảo trắng đen (Scanned Image).Tầng thượng (Layer 2): Nét vẽ của người dùng (Interactive Canvas).Yêu cầu: Các tầng dưới (0, 1) phải có khả năng điều chỉnh độ mờ (Alpha/Opacity) độc lập để họa sĩ dễ dàng can ke (trace).Ma trận biến đổi Không gian (Transformation Matrix):Logic: Khi họa sĩ dùng 2 ngón tay để phóng to một con mắt trên bức tranh, tọa độ của nét vẽ mới (ví dụ: lông mi) phải được ánh xạ chính xác vào khung hình gốc (tỷ lệ 100%), chứ không phải tọa độ trên màn hình đã zoom.Thuật toán cần dùng: Phép nhân Ma trận Affine (Affine Transformation Matrix 3x3 hoặc 4x4).Mọi thao tác Zoom, Pan, Rotate của người dùng đều tạo ra một Ma trận $M$.Khi vẽ, tọa độ màn hình ($P_{screen}$) phải được nhân với ma trận nghịch đảo ($M^{-1}$) để lưu về tọa độ gốc ($P_{canvas}$).Khối 3: Logic "Scan" Ảnh (Image to Sketch Logic)Yêu cầu bài toán:Họa sĩ muốn đưa một bức ảnh phong cảnh vào, và hệ thống tự động trích xuất các đường viền chính (cây, núi, nhà) thành một bản phác thảo trắng đen để họ đồ theo.Giải pháp Logic & Thuật toán:Khử nhiễu ảnh (Noise Reduction):Logic: Ảnh chụp luôn có nhiễu (hạt). Nếu không lọc, hệ thống sẽ nhận diện lầm các hạt nhiễu thành nét vẽ.Thuật toán cần dùng: Gaussian Blur. Chạy một bộ lọc làm mờ nhẹ bức ảnh để các vùng màu hòa vào nhau, chỉ giữ lại các ranh giới rõ rệt.Phát hiện ranh giới (Edge Detection):Logic: Tìm những điểm trên ảnh có sự thay đổi màu sắc/độ sáng đột ngột (ví dụ: mép ngọn núi tiếp giáp với bầu trời).Thuật toán cần dùng: Toán tử Sobel (Sobel Operator) hoặc Canny Edge Detector. Đây là các thuật toán xử lý ma trận điểm ảnh (pixel matrix). Chúng tính toán "đạo hàm không gian" của bức ảnh để tìm ra các đường nét biên (edges).Lọc ngưỡng (Binarization/Thresholding):Logic: Kết quả của bước 2 thường là một dải màu xám lờ mờ. Cần đưa nó về trạng thái "trắng và đen" tuyệt đối.Thuật toán cần dùng: So sánh giá trị từng pixel với một ngưỡng (Threshold) do người dùng chọn (qua thanh trượt). Vượt ngưỡng thì thành màu đen (nét vẽ), dưới ngưỡng thành màu trắng (nền).Khối 4: Logic Lịch sử (Undo/Redo System)Yêu cầu bài toán:Họa sĩ vẽ sai một nét, họ muốn hoàn tác. Xóa quá đà, họ muốn khôi phục lại. Lịch sử phải quản lý được hàng ngàn nét vẽ mà không gây sập bộ nhớ (Out of Memory).Giải pháp Logic & Thuật toán:Cấu trúc dữ liệu:Logic: Sử dụng 2 cấu trúc Stack (Ngăn xếp) LIFO (Last In, First Out): Một UndoStack và một RedoStack.Chiến lược lưu trữ (Storage Strategy):Logic: KHÔNG lưu toàn bộ ảnh (bitmap) của Canvas mỗi lần vẽ. Làm vậy app sẽ sập ngay sau 10 lần vẽ vì hết RAM.Thuật toán: Lưu trữ theo hướng Vector. Mỗi phần tử trong Stack chỉ là MỘT ĐỐI TƯỢNG Stroke (chứa mảng tọa độ, màu sắc, độ dày).Khi Undo: Rút Stroke cuối cùng ra khỏi mảng hiển thị, đẩy sang RedoStack.Khi Redo: Rút Stroke từ RedoStack, đẩy lại vào mảng hiển thị.Khi có nét vẽ mới: Xóa toàn bộ dữ liệu trong RedoStack.
+3.1. Nhận diện và Xây dựng IoT Dashboard (Smart Home UI)
+Thay vì cạnh tranh ở mảng thiết kế website chung chung, hãy thu hẹp vào ngách thiết kế giao diện điều khiển thiết bị phần cứng.
+
+Nhận diện Component đặc thù: Đào tạo hệ thống nhận diện các nét vẽ tay thành các control widget. Ví dụ: vẽ một vòng tròn có vạch chia -> Nút vặn nhiệt độ (Knob); vẽ một thanh ngang -> Slider điều khiển độ sáng.
+
+Tích hợp hiển thị phần cứng: Nếu user vẽ một hình chữ nhật lớn kèm biểu tượng nút "Play" ở giữa, hệ thống lập tức render ra một placeholder cho luồng video trực tiếp từ Cloud Camera. Giao diện sinh ra có thể được thiết kế sẵn để dễ dàng bọc các thư viện phần cứng (như Tuya SDK) ngay khi export code.
+
+2. Bơm nội dung thật bằng Local LLM (Thay thế Dummy Data)
+Các công cụ hiện tại thường nhét chữ "Lorem Ipsum" vào các khối văn bản, làm thiết kế trông rất vô hồn.
+
+Cơ chế: Khi user phác thảo xong một khối văn bản (text block), ứng dụng sẽ cho phép họ nhập một từ khóa ngắn (ví dụ: "giới thiệu quán cà phê").
+
+Xử lý: Ứng dụng sẽ gọi ngầm đến một mô hình ngôn ngữ lớn (có thể thiết lập gọi API đến một mô hình chạy local qua Ollama để bảo mật và tiết kiệm chi phí). LLM sẽ sinh ra đoạn văn bản tiếng Việt cực chuẩn và điền thẳng vào UI vừa được render, giúp bản Preview trông như một sản phẩm đã hoàn thiện 100%.
+
+3. Vẽ Luồng Tương Tác (Draw to BLoC Event)
+Vẽ giao diện tĩnh là chuyện cũ, vẽ luôn cả logic hoạt động mới là điều khác biệt.
+
+Cơ chế mũi tên: Cho phép người dùng vẽ một khối Button, sau đó vẽ một mũi tên chỉ sang một khối hình chữ nhật khác (Popup).
+
+Ánh xạ State Management: Khi bấm "Generate", hệ thống không chỉ render ra UI mà còn tự động sinh ra sẵn các Event và State trong BLoC (ví dụ: ShowPopupEvent, PopupDisplayedState) và gán sẵn hàm onPressed vào nút bấm đó để kích hoạt chuyển đổi trạng thái thực tế ngay trên màn hình Preview.
+
+4. Đa nền tảng Code Export (Flutter & React Native)
+Bản MVP không chỉ dừng lại ở việc hiển thị Preview bằng Flutter.
+
+Bổ sung một nút "Export Code". Dựa vào cây layout (Layout Tree) đã phân tích được ở bước ánh xạ, hệ thống sẽ dịch các thành phần này ra các đoạn code chuẩn chỉ (clean code).
+
+Hỗ trợ xuất ra mã nguồn Flutter (sử dụng Column, Row, Container) và cả React Native (sử dụng View, Text, StyleSheet). Việc hỗ trợ xuất ra nhiều framework mobile sẽ thu hút một lượng lớn developer sử dụng tool của bạn để làm boilerplate code.
+
